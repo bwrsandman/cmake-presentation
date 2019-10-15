@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>CMake</title>
+    <link rel="stylesheet" href="./css/reveal.css" />
+    <link rel="stylesheet" href="./css/theme/night.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+    <link rel="stylesheet" href="./css/print/paper.css" type="text/css" media="print" />
+
+    <script>
+      document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>');
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template">
+
+# CMake 
+
+Sandy Carter - October 2019 - Guest Lecture
+
+<aside class="notes"><p>SELF: Use layout default with big current slide on left.</p>
+<p>Introduce self and experience with CMake.</p>
+<p>About 10 years experience with open source and professional experience.</p>
+<p>Ask about cmake experience.</p>
+<p>Truth of the matter is most people and project do not use CMake well and while
+some projects can work very well, some platforms suffer. Mainly Windows.
+I will focus on windows experience due to CMake usually working out of the box
+on linux.</p>
+<p>Please interrupt me if you have a question. I will be happy to answer.</p>
+<p>Slides will be available in the chat.</p>
+</aside></script></section><section  data-markdown><script type="text/template">
+## History
+
+* Development began in 1999
+* Inspired by `pcmaker` by Ken Martin
+* Initial release: 2000
+* Old CMake (Version 2.*): April 2005
+    * `UPPER_CASE_COMMANDS()`
+* Modern CMake (Version 3.*): June 2014
+    * `lower_case_commands()`
+    * `target_*` commands
+    * You should be using Modern CMake principles  <!-- .element: class="fragment" -->
+
+<aside class="notes"><ul>
+<li>Funded by the US national Library of Medicine</li>
+<li>Goal: Cross-platform build environment for the Insight Segementation and Registration Toolkit (ITK) mimicking Unix configure scripts.</li>
+<li>This talk will be about modern CMake, which is version 3 and later</li>
+<li>Be sure to use modern cmake</li>
+<li>Easy to spot old style:<ul>
+<li><code>UPPER_CASE_COMMANDS</code></li>
+<li>Does not use <code>target_*</code> commands</li>
+<li>Minimul required version is less than 3</li>
+</ul>
+</li>
+<li>You should be using Modern CMake!</li>
+<li>Modern CMake (Version 3.0): June 2014<ul>
+<li>Introduction of target-specific commands and properties to replace CMake 2 commands.</li>
+</ul>
+</li>
+</ul>
+</aside></script></section><section ><section data-markdown><script type="text/template">
+## Why use CMake?
+</script></section><section data-markdown><script type="text/template">
+### Open Source
+License BSD 3-clause
+
+<aside class="notes"><p>A growing number of C and C++ projects either support CMake or rely entirely on CMake for building.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Cross-platform
+* Windows 32-bit and 64-bit
+* MinGW/MSYS2 + Cygwin
+* Mac OSX 10.7 or later
+* Linux (Virtually all distros and architectures)
+* FreeBSD and more!
+
+<aside class="notes"><p>CMake.org offers binaries for Windows, Mac and Linux.
+Other platforms and distributions distribute their own binaries.
+Most exotic platforms can use cmake by compiling it from source.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Multiple Generators
+> No need to retarget Windows SDK
+
+```bash
+$ cmake -G "Name of generator" ...
+```
+![generators](generators-ui.png)
+
+<aside class="notes"><p>CMake automatically selects the correct compiler and sdk on windows so you can
+share a project without having the same windows SDK or even the same version of
+visual studio.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Multiple Generators
+
+* Makefiles (Borland, MSYS/MinGW, NMake, Unix, Watcom)
+* Visual Studio .sln (6, 7, 2005, 2010, 2012, 2013, 2015, 2017, 2019)
+* Ninja
+* Clion (Native)
+* CodeBlocks
+* Code Lite, Eclipse, Kate, Sublime Text, etc.
+
+
+<aside class="notes"><p>If you don&#39;t want to use visual studio, you have many choices of different
+generators.</p>
+<p>If you&#39;re on different platforms or using different IDEs, many of them support
+CMake or CMake supports generating projects for them.</p>
+<p>VS2017 and VS2019 have CMake support as well as generators.
+Generators create the sln and vcproj while native support reads the CMakeLists directly.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Cross Compile with toolsets
+
+* MinGW-64
+* Arduino
+* Docker
+* IOS
+* Android
+* WebAssembly
+* AVR, ARM, PPC, etc
+
+<aside class="notes"><p>You can compile from one platform to another with toolsets.
+Toolsets are cmake scripts for finding cross-compilers and related libraries.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Project Configuration as Code
+
+![CMake edit](sln-commit.png)
+
+<aside class="notes"><p>If you&#39;ve ever worked on a project using git and visual studio solutions, the
+changes to a project such as dependencies, added projects or modified compiler
+options are very hard to follow.
+This is partly because solution files are not really meant to be human-readable
+and are stored in an xml file.
+Reading this is like reading changes to a word document with notepad.</p>
+<p>Commit message</p>
+<ul>
+<li>Fixed project build dependencies.
+<a href="https://github.com/pierricgimmig/orbitprofiler/commit/4a58983c28dad55177dca8f30a2aa33027a4346b#diff-319ff2ff7803e594157e0b401c1ae7c2">https://github.com/pierricgimmig/orbitprofiler/commit/4a58983c28dad55177dca8f30a2aa33027a4346b#diff-319ff2ff7803e594157e0b401c1ae7c2</a></li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background="./sln-commit.png" -->
+
+![](wtfamireading.jpg)
+
+<aside class="notes"><p>Can you tell what&#39;s happening here?</p>
+<p>Commit message</p>
+<ul>
+<li>Fixed project build dependencies.
+<a href="https://github.com/pierricgimmig/orbitprofiler/commit/4a58983c28dad55177dca8f30a2aa33027a4346b#diff-319ff2ff7803e594157e0b401c1ae7c2">https://github.com/pierricgimmig/orbitprofiler/commit/4a58983c28dad55177dca8f30a2aa33027a4346b#diff-319ff2ff7803e594157e0b401c1ae7c2</a></li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+### Project Configuration as Code
+
+![CMake edit](cmake-commit.png)
+
+<small>https://github.com/pierricgimmig/orbitprofiler</small>
+
+<aside class="notes"><p>This is the same project but later when using CMake.</p>
+<p>CMake configuration files are writen with their own scripting language.
+This means that changes are:</p>
+<ul>
+<li>Readable</li>
+<li>Mergeable</li>
+<li>Debuggable</li>
+<li>Revertable</li>
+</ul>
+<p>Commit message:</p>
+<ul>
+<li>Fixed DIA SDK directory.</li>
+<li>Note that <code>add_definitions</code> should be <code>target_add_definitions</code> per modern cmake</li>
+<li><a href="https://github.com/pierricgimmig/orbitprofiler/commit/b259935e5478f7beab7ddd6efba061f1fabf0f07#diff-9351342761fceaf9046e4bb8314f3693">https://github.com/pierricgimmig/orbitprofiler/commit/b259935e5478f7beab7ddd6efba061f1fabf0f07#diff-9351342761fceaf9046e4bb8314f3693</a></li>
+</ul>
+</aside></script></section></section><section ><section data-markdown><script type="text/template">
+## Using CMake
+
+<aside class="notes"><p>Moving on to how cmake works.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Stages
+
+1. Configure
+    * Multi-platform select, options, packages
+    * `CMakeCache.txt`
+2. Generate
+3. Build
+4. Install
+5. Test, Package, etc
+
+<aside class="notes"><p>I&#39;m going to do a brief overview of the stages of using cmake.</p>
+<ol>
+<li>Configure<ol>
+<li>Select compiler, linker, toolset, generator</li>
+<li>Options</li>
+<li><code>find_package</code></li>
+<li>Create <code>CMakeCache.txt</code></li>
+<li>Generated source files and other custom commands</li>
+</ol>
+</li>
+<li>Generate<ol>
+<li>Creates sln/makefile/xcode, etc</li>
+</ol>
+</li>
+<li>Build<ol>
+<li>Pre-build commands</li>
+<li>Object code</li>
+<li>Post-build commands</li>
+<li>Linking</li>
+<li>Post-linking commands</li>
+</ol>
+</li>
+</ol>
+<p>Developer should not edit generated files (sln, Makefiles) not should she include them in VCS (use you .gitignore)
+In visual studio, Configure and Generate are run in <code>ZERO_CHECK</code> when a cmake configuration file is edited.</p>
+<p><a href="https://github.com/TheErk/CMake-tutorial/blob/master/precompiled-PDFs/2012-02-08-CMake-tutorial-Toulibre.pdf">https://github.com/TheErk/CMake-tutorial/blob/master/precompiled-PDFs/2012-02-08-CMake-tutorial-Toulibre.pdf</a></p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Build Types
+
+1. Debug
+2. Release
+3. RelWithDebInfo
+4. MinSizeRel
+5. Add your own!
+
+<aside class="notes"><p>By Default, CMake can generate 4 Build types (Configurations in visual studio).</p>
+<p>Most are familiar with Debug and Release.</p>
+<ul>
+<li>RelWithDebInfo is Release but with debug symbols attached</li>
+<li>MinSizeRel is release but with optimization on the size of the executable
+instead of runtime as with Release. Useful for embedded devices or optimizing
+for instruction cache.</li>
+<li>Build Types can be added in the CMake Configuration so don&#39;t be afraid to
+roll out your own such as a RelWithProfiler or DebugWithoutStd</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+### Creating a CMake project
+
+```cmake
+# CMakeLists.txt
+
+# Set the minimum required version of CMake for this project.
+# Error will be raised if version is too low.
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+
+# Give the project a name.
+# This is analogous to a solution name in VS
+project(hello_cmake)
+```
+
+<aside class="notes"><p>The configuration is done in a file called <code>CMakeLists.txt</code> at the root of the
+project. This file and all cmake files it includes or adds are the files which
+need to be included in git.</p>
+<p>It is important to set a minimum required version of CMake.</p>
+<p>The version needs to be a the version of the newest feature of CMake used or
+that you plan to use.</p>
+<p>I recommend also adding <code>FATAL_ERROR</code> to prevent older versions of CMake from
+attempting to configure a project.</p>
+<p>Setting a newer version of CMake as the minimum required helps future proof a
+project by limiting how far back you&#39;re willing to support CMake. It&#39;s easier
+to do earlier in a project than later when the project is larger.</p>
+<p>We will touch on CMake versions later.</p>
+<p>The project Name is a high level name for the project. It does not need to be
+the name of the executable. This is analogous to a solution in CMake.</p>
+<p>For example, you can have a project with a lot of little libraries all with
+different names but they all belong to a project with a single name.</p>
+<p>e.g. boost, opencv, GNU toolkit</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Basic Configuration (Exe)
+
+```cmake
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+
+project(hello_cmake)
+
+# Define an executable
+add_executable(
+  # Executable name
+  hello_cmake
+  # Files required to compile
+  main.cpp other.cpp
+)
+```
+
+<aside class="notes"><p>This is an example of a simple CMakeLists.txt we create a executable called
+<code>hello_cmake</code> made with two source files relative to the <code>CMakeLists.txt</code>
+directory:</p>
+<ul>
+<li><code>main.cpp</code></li>
+<li><code>other.cpp</code></li>
+</ul>
+<p>The name here is the same as the project but it doesn&#39;t have to.</p>
+<p>It&#39;s a very simple example and we will add library dependencies to it later.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Basic Configuration (Lib)
+
+```cmake
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+
+project(hello_cmake)
+
+# Define a library
+add_library(
+  # Library name
+  hello_cmake_library
+  # Can be SHARED (.dll/.so) or STATIC (.lib/.a)
+  SHARED               
+  # Files required to compile
+  hello_cmake_lib.cpp other.cpp
+)
+```
+
+<aside class="notes"><p>This is a simple example of a library.</p>
+<p>Just like adding an executable, this adds a library (code without a main
+execution funtion).</p>
+<p>As with the executable, it is defined with a name and the source files, in this case:</p>
+<ul>
+<li><code>hello_cmake_lib.cpp</code></li>
+<li><code>other.cpp</code></li>
+</ul>
+<p>There is a new qualifier, however:</p>
+<ul>
+<li><code>SHARED</code>: dynamic library, this can changed after compiling. It is loaded<pre><code>      when the executable is starts, not part of the excutable.</code></pre></li>
+<li><code>STATIC</code>: static library, this is an object file that hasn&#39;t linked. It is<pre><code>      linked with the executable when the executable compiles and is part
+      of the executable. Typically this results in a larger executable.</code></pre></li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+### Variables
+
+```cmake
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+project(hello_cmake)
+
+file(
+  # GLOB to match a regular expression
+  GLOB
+  # Name of output variable
+  LIBRARY_SOURCE_FILES
+  # Regular expression pattern
+  lib/*.cpp
+)
+
+# Variables values are accessed by putting their names in ${}
+add_library(hello_cmake_library SHARED ${LIBRARY_SOURCE_FILES})
+```
+
+<aside class="notes"><p>Here is an example use of a variable: <code>LIBRARY_SOURCE_FILES</code></p>
+<p>We are defining a new variable using the function <code>file</code> with the option <code>GLOB</code>.</p>
+<p>What this does is scan the file system at configuration time. It will look at
+the regular expression <code>lib/*.cpp</code> and add all files matching to a variable with
+the name supplied.</p>
+<p>Since CMake is a scripting language, there isn&#39;t any declaring of variables,
+just defining.</p>
+<p>Getting the value out of a variable is done using a dollar sign + brace combination.
+Dereferring a variable which was not defined will result in an empty value.</p>
+<ul>
+<li>.h files are not needed to compile a c++ project, but it is nice to include
+them as they are will be included in a visual studio solution but this serves
+no practical purpose to cmake</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+## Using CMake
+
+### Linking
+
+```cmake
+file(GLOB LIBRARY_SOURCE_FILES lib/*.cpp)
+add_library(hello_cmake_library SHARED ${LIBRARY_SOURCE_FILES})
+
+file(GLOB APP_SOURCE_FILES app/*.cpp)
+add_executable(hello_cmake ${APP_SOURCE_FILES})
+
+# Declare hello_cmake_library as a dependency and link with it
+target_link_libraries(
+  # Target in question: the executable
+  hello_cmake
+  # Inheritance (PRIVATE, PUBLIC or INTERFACE)
+  PRIVATE  # targets depending on this will not inherit
+    hello_cmake_library
+)
+```
+
+<aside class="notes"><p>Linking is the main way to create dependencies between libraries and other
+libraries and executables.</p>
+<p>Note that we&#39;re using <code>target_link_libraries</code> which is the modern version of
+<code>link_libraries</code>. <code>link_libraries</code> would apply to all libraries and exectuables
+in a given scope (so all the targets declared in this <code>CMakeLists.txt</code> file).</p>
+<p>The <code>target_</code> functions take the target as the first parameter, an inheritance
+qualifier second, followed by the operations parameters next.</p>
+<p>We will explore the different types inheritance in the next slide.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Inheritance
+```cmake
+add_library(hello_cmake_library SHARED ${LIBRARY_SOURCE_FILES})
+# Set different include directories for library and clients
+target_include_directories(hello_cmake_library
+  PRIVATE  # Applies to this target only
+    lib/include/hello_cmake_library
+  INTERFACE  # Applies to clients but not target
+    lib/include # clients forced to #include <hello_cmake_library>
+  PUBLIC  # Applies to both target and clients
+    ${OTHER_LIB_INCLUDE_DIRECTORIES}
+)
+
+add_executable(hello_cmake ${APP_SOURCE_FILES})
+# Linking with library inherits include directories
+target_link_libraries(hello_cmake PRIVATE hello_cmake_library)
+```
+
+<aside class="notes"><p>This example is of a project which consists of an executable and a library.
+The library is in the <code>lib/</code> folder. Its headers are meant to be distributed
+with the <code>.dll</code>. We would like users of the library to include headers using
+the name of the library so the headers are in <code>lib/include/hello_cmake_library</code>
+but in the library, we would like not to have to include the library name and
+just include directly. </p>
+<p>This is done very often with C++ libraries. Including the library name as a
+folder prevents naming conflicts (e.g. both the exe and the lib have a math.h)
+header file.</p>
+<p>CMake allows us to do this very easily by adding a include directory as
+<code>PRIVATE</code>. Private declarations are applied to the target but are not inherited
+by any dependent project. <code>INTERFACE</code> parameters are inversely applied to the
+dependent projects but not to the target. Finally, <code>PUBLIC</code> parameters are
+applied to both.</p>
+<p>Be careful with this and always default to <code>PRIVATE</code>. Large project with deep
+dependencies can greatly suffer by having things declared <code>PUBLIC</code> as they
+bring all the declarations of their dependencies recursively.</p>
+<p>I&#39;ve worked at a company with 50+ active developers and 120 libraries in a
+solution where include directories were all set to public. This was the
+principle contributor of compile time due to CMake rescanning changes and
+regenerating unrealted projects in the solution. It also broke encapsulation
+and people were adding unrelated headers to executables. There were circular
+dependencies. It was crazy, sometimes 1h after a git pull to reload a solution.
+Moving to <code>PRIVATE</code> by default helped clean up useless dependencies and
+improved compile time.</p>
+<p>Another reason to use <code>PUBLIC</code> is with compiler warning levels
+e.g. <code>-Wall -Werror</code> on linux is nice to have for a library but if it is public
+this means forcing this on another target which might not have such rigourous check.
+It&#39;s not up to the dependency to dictate this and should limit itself to
+providing the bare essentials.</p>
+<p>Rule of thumb, if your library works without a certain definition, set it to 
+<code>PRIVATE</code>.</p>
+<p>In summary:</p>
+<ul>
+<li>Including a libary or exectuable will bring in their public and interface link targets, include paths,</li>
+<li>options and defines. Anything marked private will not be inherited.</li>
+<li>INTERFACE is like PUBLIC but doesn&#39;t apply to the current target. See next slide.</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+### External packages
+
+```cmake
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+project(hello_cmake)
+
+# Find OpenGL package installed on the system
+# These are imported target aliases which means cmake won't try to
+# compile them.
+# Looks for cmake/Modules/FindOpenGL.cmake, this file defines how
+# to find the lib and include directories and creates the aliases
+find_package(OpenGL REQUIRED COMPONENTS GL GLU)
+
+add_executable(hello_cmake main.cpp other.cpp)
+# Link with both components from the OpenGL namespace
+target_link_libraries(hello_cmake PRIVATE OpenGL::GL OpenGL::GLU)
+```
+
+<aside class="notes"><p>This is where most newcomers to CMake get stuck.</p>
+<p>CMake works great with 3rd party external libraries and you should not have to include them in your project!
+Unixes, MinGW/MSYS and even homebrew on mac do this very well, windows struggles a bit. This is because unlike the other
+systems, windows lacks a package manager like apt, pacman or homebrew.</p>
+<p>Typically on a dev&#39;s machine you have executables (in /usr/bin for unixes), or Program Files on Windows.</p>
+<p>Libraries are located in their own place too (/usr/lib for linux), this is nebulous for Windows.</p>
+<p>Maintainers of libraries also tend to not include cmake files with their libraries on Windows.</p>
+<p>On top of that, CMake generates helper scripts to help find any CMake friendly libraries (in /usr/lib/cmake or /usr/share/cmake/Modules)</p>
+</aside></script></section><section data-markdown><script type="text/template">
+## Using CMake
+
+### Package not found
+
+![](packagenotfound.png)
+
+<aside class="notes"><p>In this example <code>find_package</code> couldn&#39;t find a <code>Findbgfx.cmake</code> file in the <code>CMAKE_MODULE_PATH</code> and it couldn&#39;t find a <code>bgfxConfig.cmake</code> in <code>CMAKE_PREFIX_PATH</code></p>
+<p>The command has two modes by which it searches for packages: “Module” mode and “Config” mode. The above signature selects Module mode. If no module is found the command falls back to Config mode, described below. This fall back is disabled if the MODULE option is given.</p>
+<p>If the MODULE option is not specfied in the above signature, CMake first searches for the package using Module mode. Then, if the package is not found, it searches again using Config mode.</p>
+<p>A user may set the variable <code>CMAKE_FIND_PACKAGE_PREFER_CONFIG</code> to <code>TRUE</code> to direct CMake first search using Config mode before falling back to Module mode.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Find Package Search Procedure
+
+Windows
+```
+C:/Program Files/
+C:/Program Files/(cmake|CMake)/
+C:/Program Files/<name>*/
+C:/Program Files/<name>*/(cmake|CMake)/
+```
+Unix
+```
+/usr/(lib/<arch>|lib*|share)/cmake/<name>*/
+/usr/(lib/<arch>|lib*|share)/<name>*/
+/usr/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/
+```
+
+<aside class="notes"><p>CMake will look in specific places.
+These places are likely to contain the correct target if it is installed properly.
+On linux and osx the package manager takes care of this.
+On windows, sometimes (but rarely, an installer will put the Find/Config files in the right place),
+often times you have to download the library yourself, run it through cmake, config, generate, compile and most importantly, INSTALL in C:/Program Files
+Skipping this step means you have to deal with package not found errors and you may have to set the directory yourself, or specify a <code>CMAKE_PREFIX_PATH</code> of your own.</p>
+<p>Package maintainers providing CMake package configuration files are encouraged to name and install them such that the Search Procedure outlined below will find them without requiring use of additional options.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Other Useful Commands
+
+```cmake
+# Add precompiler definitions
+target_compile_definitions(<target> <INTERFACE|PUBLIC|PRIVATE> [items1...])
+
+# Add compiler-specific options (e.g. -Wall)
+target_compile_options(<target> [BEFORE] <INTERFACE|PUBLIC|PRIVATE> [items1...])
+
+# Add cross-compiler features (e.g. cxx_constexpr)
+target_compile_features(<target> <PRIVATE|PUBLIC|INTERFACE> <feature> [...])
+
+# Find an executable on the system
+find_program (<VAR> name1 [path1 path2 ...])
+
+# Generate a target using unusual commands (e.g. compiling shaders)
+add_custom_target(Name [ALL] [command1 [args1...]] ...)
+```
+</script></section><section data-markdown><script type="text/template">
+### Using a package manager
+
+* `FetchContent` (CMake >= 3.11): https://cmake.org/cmake/help/latest/module/FetchContent.html
+* Vcpkg: https://github.com/Microsoft/vcpkg
+* Hunter: https://github.com/cpp-pm/hunter
+
+<aside class="notes"><p>There is movement towards making packaging in CMake easier for platforms
+where package managers don&#39;t provide enough CMake libraries.</p>
+<p>Since CMake 3.11, there is a configure time command <code>FetchContent</code> which can
+clone or download a dependency and compile it if it contains a <code>CMakeLists.txt</code>
+file at its root. The downside is that this can cause very long configure times
+because you are essentially compiling your dependencies at first configuration.
+It also requires an internet connection while configuring.</p>
+<p>Microsoft has released a package manager for C and C++ called Vcpkg which
+supplies a toolchain file for CMake. The dependencies are not compiled at
+configuration time and they are installed on the system to be available for
+other projects.</p>
+<p>There is also Hunter which is another package manager for CMake which supports
+pre-compiled packages. Like <code>FetchContent</code> it fetches at configure time. They
+maintain forks of libraries so you have to check if they&#39;re maintained. Adding
+a script is a little complex but open to anyone.</p>
+</aside></script></section><section data-markdown><script type="text/template">
+### Different versions of CMake
+
+| Platform | Version |
+|----------|---------------|
+| Latest Release | 3.15.4  |
+| Arch Linux  (rolling) | 3.15.4 |
+| OSX (Homebrew) | 3.15.4 |
+| Visual Studio 2019 | 3.14.1  |
+| Ubuntu disco  (19.04) | 3.13.4 |
+| Visual Studio 2017 | 3.12.1  |
+| Ubuntu bionic  (18.04 LTS) | <span style="color:red">3.10.2</span> |
+
+
+<aside class="notes"><p>Be careful, when using a minimum version if you want support multiple platforms.
+Different OSs and even different IDEs support different versions of CMake
+Be aware that the Long-term support version of Ubuntu which is also the default
+distro of many continuous integration platforms is held back at 3.10 until the next
+LTS in 2020. Updating on Ubuntu is non-trivial.</p>
+<p><code>FetchContent</code> is not availble for Ubuntu LTS.</p>
+</aside></script></section></section><section ><section data-markdown><script type="text/template">
+## Resources
+
+### Official resources
+
+* Website: https://cmake.org
+* Source: https://gitlab.kitware.com/cmake
+* Documentation: https://cmake.org/cmake/help
+* Wiki: https://gitlab.kitware.com/cmake/community/wikis
+* Mailing list: https://cmake.org/mailing-lists
+
+<aside class="notes"><p>This is my talk, if need more information. Check the official channels.
+I would advise against the official tutorial page. It is a decade out of date.</p>
+<p>Next slide has good tutorials and resources for MODERN CMAKE</p>
+</aside></script></section><section data-markdown><script type="text/template">
+## Resources
+
+### Guides
+
+* Modern CMake: https://cliutils.gitlab.io/modern-cmake
+* Effective Modern CMake: https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1
+* CMake Anti-Antipatterns: https://blog.kevinwmatthews.com/cmake-anti-antipatterns
+* Awesome CMake https://github.com/onqtam/awesome-cmake
+
+<aside class="notes"><p>That&#39;s my talk...
+Questions?</p>
+</aside></script></section></section><section  data-markdown><script type="text/template"># Questions?
+</script></section></div>
+    </div>
+
+    <script src="./js/reveal.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // Optional libraries used to extend on reveal.js
+      var deps = [
+        { src: './plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: './plugin/zoom-js/zoom.js', async: true },
+        { src: './plugin/notes/notes.js', async: true },
+        { src: './plugin/math/math.js', async: true }
+      ];
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        dependencies: deps
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal.getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"transition":"fade","width":"80%","height":"80%"}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>
