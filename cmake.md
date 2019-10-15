@@ -411,8 +411,6 @@ Dereferring a variable which was not defined will result in an empty value.
 
 ----
 
-## Using CMake
-
 ### Linking
 
 ```cmake
@@ -547,8 +545,6 @@ Maintainers of libraries also tend to not include cmake files with their librari
 On top of that, CMake generates helper scripts to help find any CMake friendly libraries (in /usr/lib/cmake or /usr/share/cmake/Modules)
 
 ----
-
-## Using CMake
 
 ### Package not found
 
